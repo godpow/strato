@@ -129,6 +129,14 @@ namespace skyline::loader {
         }
 
         /**
+         * @return All symbolic information about the 32-bit symbol for the specified address
+         * @note If a symbol isn't found then SymbolInfo::name will be nullptr
+         */
+        SymbolInfo ResolveSymbol32(void *ptr) {
+            return ResolveSymbol<Elf32_Sym>(ptr);
+        }
+
+        /**
          * @param frame The initial stack frame or the calling function's stack frame by default
          * @return A string with the stack trace based on the supplied context
          */

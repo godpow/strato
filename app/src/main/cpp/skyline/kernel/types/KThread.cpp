@@ -6,6 +6,7 @@
 #include <common/signal.h>
 #include <common/trace.h>
 #include <nce.h>
+#include <cpu.h>
 #include <os.h>
 #include "KProcess.h"
 #include "KThread.h"
@@ -34,7 +35,7 @@ namespace skyline::kernel::type {
             timer_delete(preemptionTimer);
     }
 
-    void KThread::StartThread() {
+    void KThread::StartThreadNce() {
         pthread = pthread_self();
         std::array<char, 16> threadName{};
         if (int result{pthread_getname_np(pthread, threadName.data(), threadName.size())})
@@ -44,8 +45,10 @@ namespace skyline::kernel::type {
             LOGW("Failed to set the thread name: {}", strerror(result));
         AsyncLogger::UpdateTag();
 
-        if (!ctx.tpidrroEl0)
-            ctx.tpidrroEl0 = parent->AllocateTlsSlot();
+        if (!tlsRegion)
+            tlsRegion = parent->AllocateTlsSlot();
+
+        ctx.tpidrroEl0 = tlsRegion;
 
         ctx.state = &state;
         state.ctx = &ctx;
@@ -197,6 +200,29 @@ namespace skyline::kernel::type {
             abi::__cxa_end_catch();
             std::longjmp(originalCtx, true);
         }
+    }
+
+    void KThread::StartThreadJit32() {
+        ctx32.gpr[0] = static_cast<u32>(entryArgument);
+        ctx32.gpr[1] = handle;
+
+        ctx32.sp = static_cast<u32>(reinterpret_cast<uintptr_t>(stackTop));
+        ctx32.pc = static_cast<u32>(reinterpret_cast<uintptr_t>(entry));
+
+        if (!tlsRegion)
+            tlsRegion = parent->AllocateTlsSlot();
+
+        auto &jit_core{state.cpu->jit_cores[coreId]};
+        jit_core.RestoreContext(ctx32);
+        jit_core.SetTlsPointer(static_cast<u32>(reinterpret_cast<uintptr_t>(tlsRegion)));
+        jit_core.Run();
+    }
+
+    void KThread::StartThread() {
+        if (state.process->npdm.meta.flags.is64Bit)
+            StartThreadNce();
+        else
+            StartThreadJit32();
     }
 
     void KThread::Start(bool self) {

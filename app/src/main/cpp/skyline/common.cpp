@@ -3,6 +3,7 @@
 
 #include "common.h"
 #include "nce.h"
+#include "cpu.h"
 #include "soc.h"
 #include "gpu.h"
 #include "audio.h"
@@ -17,6 +18,7 @@ namespace skyline {
         soc = std::make_shared<soc::SOC>(*this);
         audio = std::make_shared<audio::Audio>(*this);
         nce = std::make_shared<nce::NCE>(*this);
+        cpu = std::make_shared<cpu::CPU>(*this);
         scheduler = std::make_shared<kernel::Scheduler>(*this);
         input = std::make_shared<input::Input>(*this);
     }

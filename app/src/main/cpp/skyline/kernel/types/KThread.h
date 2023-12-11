@@ -5,6 +5,7 @@
 
 #include <csetjmp>
 #include <nce/guest.h>
+#include <jit/thread_context.h>
 #include <kernel/scheduler.h>
 #include <common/signal.h>
 #include <common/spin_lock.h>
@@ -25,9 +26,19 @@ namespace skyline {
 
             /**
              * @brief Entry function any guest threads, sets up necessary context and jumps into guest code from the calling thread
-             * @note This function also serves as the entry point for host threads created in StartThread
              */
             void StartThread();
+
+            /**
+             * @brief Entry function for any guest thread when running with NCE, sets up necessary context and jumps into guest code from the calling thread
+             * @note This function also serves as the entry point for host threads created in StartThread
+             */
+            void StartThreadNce();
+
+            /**
+             * @brief Entry function for any guest thread when running with 32-bit JIT, sets up necessary context and jumps into guest code from the calling thread
+             */
+             void StartThreadJit32();
 
           public:
             std::mutex statusMutex; //!< Synchronizes all thread state changes (running/ready/killed)
@@ -42,9 +53,12 @@ namespace skyline {
             nce::ThreadContext ctx{}; //!< The context of the guest thread during the last SVC
             jmp_buf originalCtx; //!< The context of the host thread prior to jumping into guest code
 
+            jit::ThreadContext32 ctx32{}; //!< The context of the guest thread (32-bit JIT)
+
             void *entry; //!< A function pointer to the thread's entry
             u64 entryArgument; //!< An argument to provide with to the thread entry function
             void *stackTop; //!< The top of the guest's stack, this is set to the initial guest stack pointer
+            u8 *tlsRegion{}; //!< The TLS region for this thread
 
             AdaptiveSingleWaiterConditionVariable scheduleCondition; //!< Signalled to wake the thread when it's scheduled or its resident core changes
             std::atomic<i8> basePriority; //!< The priority of the thread for the scheduler without any priority-inheritance

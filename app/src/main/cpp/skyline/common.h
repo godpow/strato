@@ -29,6 +29,9 @@ namespace skyline {
         struct ThreadContext;
     }
     class JvmManager;
+    namespace cpu {
+        class CPU;
+    }
     namespace gpu {
         class GPU;
     }
@@ -69,6 +72,7 @@ namespace skyline {
         std::shared_ptr<kernel::type::KProcess> process{};
         static thread_local inline std::shared_ptr<kernel::type::KThread> thread{}; //!< The KThread of the thread which accesses this object
         static thread_local inline nce::ThreadContext *ctx{}; //!< The context of the guest thread for the corresponding host thread
+        std::shared_ptr<cpu::CPU> cpu;
         std::shared_ptr<gpu::GPU> gpu;
         std::shared_ptr<soc::SOC> soc;
         std::shared_ptr<audio::Audio> audio;
