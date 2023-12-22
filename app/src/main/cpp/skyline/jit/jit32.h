@@ -5,6 +5,7 @@
 
 #include <common.h>
 #include <dynarmic/interface/A32/a32.h>
+#include <kernel/svc_context.h>
 #include "thread_context.h"
 #include "halt_reason.h"
 
@@ -53,7 +54,17 @@ namespace skyline::jit {
         /**
          * @brief Restores the state of the JIT from the given context.
          */
-        void RestoreContext(ThreadContext32 &context);
+        void RestoreContext(const ThreadContext32 &context);
+
+        /**
+         * @brief Constructs an SvcContext from the current state of the JIT
+         */
+        kernel::svc::SvcContext MakeSvcContext();
+
+        /**
+         * @brief Applies the given SvcContext to the current state of the JIT
+         */
+        void ApplySvcContext(const kernel::svc::SvcContext &context);
 
         /**
          * @brief Sets the Thread Pointer register to the specified value

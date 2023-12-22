@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: MPL-2.0
 // Copyright © 2023 Strato Team and Contributors (https://github.com/strato-emu/)
 
+#include <common/trace.h>
 #include <kernel/types/KProcess.h>
+#include <kernel/svc.h>
 #include "jit32.h"
 
 namespace skyline::jit {
@@ -39,11 +41,28 @@ namespace skyline::jit {
         context.fpscr = jit.Fpscr();
     }
 
-    void Jit32::RestoreContext(ThreadContext32 &context) {
+    void Jit32::RestoreContext(const ThreadContext32 &context) {
         jit.Regs() = context.gpr;
         jit.ExtRegs() = context.fpr;
         jit.SetCpsr(context.cpsr);
         jit.SetFpscr(context.fpscr);
+    }
+
+    kernel::svc::SvcContext Jit32::MakeSvcContext() {
+        kernel::svc::SvcContext ctx{};
+        const auto &jitRegs{jit.Regs()};
+
+        for (size_t i = 0; i < ctx.regs.size(); i++)
+            ctx.regs[i] = static_cast<u64>(jitRegs[i]);
+
+        return ctx;
+    }
+
+    void Jit32::ApplySvcContext(const kernel::svc::SvcContext &svcCtx) {
+        auto &jitRegs{jit.Regs()};
+
+        for (size_t i = 0; i < svcCtx.regs.size(); i++)
+            jitRegs[i] = static_cast<u32>(svcCtx.regs[i]);
     }
 
     void Jit32::SetThreadPointer(u32 thread_ptr) {
@@ -154,8 +173,21 @@ namespace skyline::jit {
     }
 
     void Jit32::CallSVC(u32 swi) {
-        // Do something.
-        throw exception("Performed SVC: {}", swi);
+        auto svc{kernel::svc::SvcTable[swi]};
+        if (svc) [[likely]] {
+            TRACE_EVENT("kernel", perfetto::StaticString{svc.name});
+            auto svcContext = MakeSvcContext();
+            (svc.function)(state, svcContext);
+            ApplySvcContext(svcContext);
+        } else {
+            throw exception("Unimplemented SVC 0x{:X}", swi);
+        }
+
+        while (kernel::Scheduler::YieldPending) [[unlikely]] {
+            state.scheduler->Rotate(false);
+            kernel::Scheduler::YieldPending = false;
+            state.scheduler->WaitSchedule();
+        }
     }
 
     void Jit32::ExceptionRaised(u32 pc, Dynarmic::A32::Exception exception) {
