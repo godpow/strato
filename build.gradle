@@ -30,17 +30,13 @@ allprojects {
         maven { url 'https://www.jitpack.io' }
     }
 }
-def assembleFullRelease = []
 
-tasks.all {
-    if (it.name.contains("assembleRelease")) {
-        assembleFullRelease.add(it)
-    }
+// Define the assembleFullRelease task
+task assembleFullRelease {
+    dependsOn(tasks.matching { it.name.startsWith('assembleRelease') })
 }
 
-tasks.register("assembleAllRelease") {
-    dependsOn assembleFullRelease
-}
 tasks.register('clean') {
     delete rootProject.buildDir
 }
+
