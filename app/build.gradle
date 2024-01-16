@@ -18,6 +18,19 @@ android {
     namespace 'org.stratoemu.strato'
     compileSdk 34
 
+    // Add a block to execute Git commands during the execution phase
+    applicationVariants.all { variant ->
+        variant.outputs.each { output ->
+            output.assemble.doLast {
+                // Execute Git commands during the execution phase
+                def versionName = getGitVersionName()
+                def versionCode = getGitVersionCode()
+                logger.quiet("Version name: $versionName")
+                logger.quiet("Version code: $versionCode")
+            }
+        }
+    }
+
     defaultConfig {
         applicationId "org.stratoemu.strato"
 
@@ -42,6 +55,8 @@ android {
         // Uncomment the following line whenever AAPT2 will properly support BCP47 language tags
         //resourceConfigurations += locales
     }
+}
+
 
     /* JVM Bytecode Options */
     def javaVersion = JavaVersion.VERSION_17
