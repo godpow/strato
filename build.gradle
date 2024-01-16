@@ -36,6 +36,10 @@ task assembleFullRelease {
     dependsOn(tasks.matching { it.name.startsWith('assembleRelease') })
 }
 
+task assembleFullReldebug {
+    dependsOn(tasks.matching { it.name.startsWith('assembleRelease') })
+}
+
 tasks.register('clean') {
     delete rootProject.buildDir
 }
