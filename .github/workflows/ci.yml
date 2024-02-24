@@ -74,9 +74,7 @@ jobs:
 
       - name: Rename APKs (Signed)
         if: env.IS_BUILD_SIGNED == 'true' && env.UPLOAD_ARTIFACTS == 'true'
-        run: |
-          mv app/build/outputs/apk/full/reldebug/app-full-reldebug.apk strato-$GITHUB_RUN_NUMBER-reldebug.apk
-          mv app/build/outputs/apk/full/release/app-full-release.apk strato-$GITHUB_RUN_NUMBER-release.apk
+        run: ./gradlew --stacktrace --configuration-cache --build-cache --parallel --configure-on-demand assemblemainlineRelease assemblemainlineReldebug
 
       - name: Upload Signed Debug APK
         if: env.IS_BUILD_SIGNED == 'true' && env.UPLOAD_ARTIFACTS == 'true'
