@@ -47,3 +47,10 @@ jobs:
           CMAKE_CXX_COMPILER_LAUNCHER: "ccache"
           CCACHE_COMPILERCHECK: "string:${{ env.NDK_VERSION }}"
         run: ./gradlew --no-daemon --stacktrace --build-cache --parallel --configure-on-demand assembleMainlineRelease
+
+      # New step to upload the APK as an artifact
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-mainline-release
+          path: app/build/outputs/apk/mainline/release/*.apk
