@@ -28,3 +28,11 @@ namespace skyline::trace {
         Presentation = std::numeric_limits<u64>::max(),
     };
 }
+
+namespace perfetto {
+namespace internal {
+
+void WriteTrackEventArgs(perfetto::EventContext& ctx, const char* name);
+
+}  // namespace internal
+}  // namespace perfetto
