@@ -14,11 +14,11 @@ idea.module {
 project.ext.isBuildSigned = (System.getenv("CI") == "true") && (System.getenv("IS_BUILD_SIGNED") == "true")
 
 android {
-    namespace 'org.stratoemu.strato'
+    namespace 'org.sphereemu.sphere'
     compileSdk 34
 
     defaultConfig {
-        applicationId "org.stratoemu.strato"
+        applicationId "org.sphereemu.sphere"
 
         minSdk 29
         targetSdk 33

@@ -3,7 +3,7 @@
  * Copyright © 2020 Skyline Team and Contributors (https://github.com/skyline-emu/)
  */
 
-package org.stratoemu.strato.adapter
+package org.sphereemu.sphere.adapter
 
 import android.app.Dialog
 import android.content.Context
@@ -16,11 +16,11 @@ import android.widget.ImageView
 import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.viewbinding.ViewBinding
-import org.stratoemu.strato.R
-import org.stratoemu.strato.data.AppItem
-import org.stratoemu.strato.databinding.AppItemGridBinding
-import org.stratoemu.strato.databinding.AppItemGridCompactBinding
-import org.stratoemu.strato.databinding.AppItemLinearBinding
+import org.sphereemu.sphere.R
+import org.sphereemu.sphere.data.AppItem
+import org.sphereemu.sphere.databinding.AppItemGridBinding
+import org.sphereemu.sphere.databinding.AppItemGridCompactBinding
+import org.sphereemu.sphere.databinding.AppItemLinearBinding
 
 sealed class LayoutType(val builder : (parent : ViewGroup) -> ViewBinding) {
     object List : LayoutType({ ListBinding(it) })

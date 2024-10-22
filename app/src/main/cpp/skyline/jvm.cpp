@@ -1,5 +1,5 @@
-// SPDX-License-Identifier: MPL-2.0
-// Copyright © 2020 Skyline Team and Contributors (https://github.com/skyline-emu/)
+ // SPDX-License-Identifier: MPL-2.0
+// Copyright © 2020 Sphere Team and Contributors (https://github.com/skyline-emu/)
 
 #include "jvm.h"
 

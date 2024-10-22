@@ -3,7 +3,7 @@
 #   http://developer.android.com/guide/developing/tools/proguard.html
 
 # Retain all classes for traces + JNI access + Serializable classes
--keep class org.stratoemu.strato.** { *; }
+-keep class org.sphereemu.sphere.** { *; }
 # Keep kotlin classes so that kotlin reflection works
 -keep class kotlin.** {*;}
 

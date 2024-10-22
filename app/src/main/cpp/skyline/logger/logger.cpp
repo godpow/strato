@@ -1,5 +1,5 @@
-// SPDX-License-Identifier: GPL-3.0-or-later
-// Copyright © 2023 Strato Team and Contributors (https://github.com/strato-emu/)
+ // SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright © 2023 Sphere Team and Contributors (https://github.com/strato-emu/)
 
 #include <atomic>
 #include <chrono>
