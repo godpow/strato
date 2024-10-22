@@ -1,6 +1,7 @@
 #pragma once
 
 #include <common.h>
+#include <vector>
 
 namespace skyline::soc::host1x {
     /**
@@ -9,15 +10,16 @@ namespace skyline::soc::host1x {
     class NvDecClass {
       private:
         std::function<void()> opDoneCallback;
+        bool decoderInitialized;
+        std::vector<std::vector<u8>> decodedFrames;
 
       public:
         NvDecClass(std::function<void()> opDoneCallback);
 
         void CallMethod(u32 method, u32 argument);
 
-        // Add necessary methods and functionality to NvDecClass
-        void Initialize();
-        void Decode();
-        void Finalize();
+        void InitializeDecoder();
+        void DecodeFrame(const std::vector<u8>& frameData);
+        void FinalizeDecoder();
     };
 }
