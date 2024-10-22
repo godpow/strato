@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MPL-2.0
+ // SPDX-License-Identifier: MPL-2.0
 // Copyright © 2021 Skyline Team and Contributors (https://github.com/skyline-emu/)
 
 #pragma once
@@ -44,6 +44,11 @@ namespace skyline::soc::host1x {
          * @brief Executes all pending gathers in the FIFO and polls for more
          */
         void Run();
+
+        /**
+         * @brief Processes NVDEC commands
+         */
+        void ProcessNvDecCommand(u32 method, u32 argument);
 
       public:
         ChannelCommandFifo(const DeviceState &state, SyncpointSet &syncpoints);

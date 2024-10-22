@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT OR MPL-2.0
+ // SPDX-License-Identifier: MIT OR MPL-2.0
 // Copyright © 2020 Skyline Team and Contributors (https://github.com/skyline-emu/)
 
 #include "driver.h"
@@ -118,7 +118,7 @@ namespace skyline::service::nvdrv {
         try {
             std::shared_lock lock(deviceMutex);
             LOGD("fd: {}, cmd: 0x{:X}, device: {}", fd, cmd.raw, devices.at(fd)->GetName());
-            TRACE_EVENT("service", "Ioctl", "fd", fd, "cmd", cmd.raw);
+            TRACE_EVENT("service", "Ioctl", "fd", "cmd", cmd.raw);
             return ConvertResult(LogIoctlResult(devices.at(fd)->Ioctl2(cmd, buffer, inlineBuffer), cmd.raw));
         } catch (const std::out_of_range &) {
             throw exception("Ioctl2 was called with invalid fd: {}", fd);

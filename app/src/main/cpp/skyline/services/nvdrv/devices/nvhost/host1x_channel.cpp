@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT OR MPL-2.0
+ // SPDX-License-Identifier: MIT OR MPL-2.0
 // Copyright © 2021 Skyline Team and Contributors (https://github.com/skyline-emu/)
 
 #include <soc.h>
@@ -59,6 +59,26 @@ namespace skyline::service::nvdrv::device::nvhost {
             span gather(reinterpret_cast<u32 *>(gatherAddress), cmdBuf.words);
             // Skip submitting the cmdbufs as no functionality is implemented
             // state.soc->host1x.channels[static_cast<size_t>(channelType)].Push(gather);
+        }
+
+        if (channelType == core::ChannelType::NvDec) {
+            LOGD("NVDEC command submission");
+            // Implement NVDEC specific functionality here
+            auto nvdecClass = state.soc->host1x.GetNvDecClass();
+            for (const auto &cmdBuf : cmdBufs) {
+                auto handleDesc{core.nvMap.GetHandle(cmdBuf.mem)};
+                if (!handleDesc)
+                    throw exception("Invalid handle passed for a command buffer!");
+
+                u64 gatherAddress{handleDesc->address + cmdBuf.offset};
+                span gather(reinterpret_cast<u32 *>(gatherAddress), cmdBuf.words);
+
+                for (u32 word : gather) {
+                    u32 method = word >> 16;
+                    u32 argument = word & 0xFFFF;
+                    nvdecClass->CallMethod(method, argument);
+                }
+            }
         }
 
         return PosixResult::Success;

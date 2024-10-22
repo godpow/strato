@@ -1,6 +1,3 @@
-// SPDX-License-Identifier: MIT OR MPL-2.0
-// Copyright © 2021 Skyline Team and Contributors (https://github.com/skyline-emu/)
-
 #pragma once
 
 #include <services/common/fence.h>

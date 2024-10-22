@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT OR MPL-2.0
+ // SPDX-License-Identifier: MIT OR MPL-2.0
 // Copyright © 2020 Skyline Team and Contributors (https://github.com/skyline-emu/)
 // Copyright © 2019-2020 Ryujinx Team and Contributors (https://github.com/Ryujinx/)
 
@@ -106,5 +106,16 @@ namespace skyline::service::nvdrv::core {
          * @return A fence that will be signalled once this syncpoint hits its maximum value
          */
         Fence GetSyncpointFence(u32 id);
+
+        /**
+         * @brief Utilizes the NVDEC syncpoint
+         */
+        void UtilizeNvDecSyncpoint() {
+            // Implementation for utilizing the NVDEC syncpoint
+            // This is a placeholder for the actual implementation
+            if (IsSyncpointAllocated(ChannelSyncpoints[static_cast<u32>(ChannelType::NvDec)])) {
+                IncrementSyncpointMaxExt(ChannelSyncpoints[static_cast<u32>(ChannelType::NvDec)], 1);
+            }
+        }
     };
 }

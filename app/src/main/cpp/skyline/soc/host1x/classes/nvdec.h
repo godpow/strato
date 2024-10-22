@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MPL-2.0
+ // SPDX-License-Identifier: MPL-2.0
 // Copyright © 2021 Skyline Team and Contributors (https://github.com/skyline-emu/)
 
 #pragma once
@@ -17,5 +17,9 @@ namespace skyline::soc::host1x {
         NvDecClass(std::function<void()> opDoneCallback);
 
         void CallMethod(u32 method, u32 argument);
+
+        void InitializeDecoder();
+        void DecodeFrame(const std::vector<u8>& frameData);
+        void ResetDecoder();
     };
 }
