@@ -1,10 +1,8 @@
-// SPDX-License-Identifier: MPL-2.0
-// Copyright © 2020 Skyline Team and Contributors (https://github.com/skyline-emu/)
-
 #pragma once
 
 #include "host1x/syncpoint.h"
 #include "host1x/command_fifo.h"
+#include "host1x/classes/nvdec.h"
 
 namespace skyline::soc::host1x {
     constexpr static size_t ChannelCount{14}; //!< The number of channels within host1x
@@ -17,7 +15,12 @@ namespace skyline::soc::host1x {
       public:
         SyncpointSet syncpoints;
         std::array<ChannelCommandFifo, ChannelCount> channels;
+        NvDecClass nvDecClass;
 
-        Host1x(const DeviceState &state) : channels{util::MakeFilledArray<ChannelCommandFifo, ChannelCount>(state, syncpoints)} {}
+        Host1x(const DeviceState &state) : channels{util::MakeFilledArray<ChannelCommandFifo, ChannelCount>(state, syncpoints)}, nvDecClass([]{}) {}
+
+        NvDecClass& GetNvDecClass() {
+            return nvDecClass;
+        }
     };
 }
