@@ -240,8 +240,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun validateAppEntry(entry : AppEntry) : Boolean {
+        // Updates and DLC are attached to their base game and must never be launchable on their own
         // Unknown ROMs are shown because NROs have this type
-        return !appSettings.filterInvalidFiles || entry.loaderResult != LoaderResult.ParsingError && (entry.romType == RomType.Base || entry.romType == RomType.Unknown)
+        if (entry.romType != RomType.Base && entry.romType != RomType.Unknown)
+            return false
+        return !appSettings.filterInvalidFiles || entry.loaderResult != LoaderResult.ParsingError
     }
 
     private fun handleState(state : MainState) = when (state) {
