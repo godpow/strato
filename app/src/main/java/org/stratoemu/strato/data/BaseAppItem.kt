@@ -71,7 +71,9 @@ open class BaseAppItem(private val meta : AppEntry, val enabled: Boolean = false
         when (meta.loaderResult) {
             LoaderResult.Success -> R.string.metadata_missing
 
-            LoaderResult.ParsingError -> R.string.invalid_file
+            LoaderResult.ParsingError,
+            LoaderResult.ErrorSparseNCA,
+            LoaderResult.ErrorCompressedNCA -> R.string.invalid_file
 
             LoaderResult.MissingTitleKey -> R.string.missing_title_key
 
