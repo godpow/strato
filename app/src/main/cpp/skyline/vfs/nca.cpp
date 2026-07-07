@@ -114,19 +114,19 @@ namespace skyline::vfs {
         auto sectionBacking{GetSectionBacking(sectionHeader, entry)};
         auto decryptedBacking{CreateBacking(sectionHeader, std::make_shared<RegionBacking>(sectionBacking, romFsOffset, romFsSize), romFsOffset)};
 
-        if (sectionHeader.raw.header.encryptionType == NcaSectionEncryptionType::BKTR && bktrBaseRomfs && romFs) {
+        if (sectionHeader.raw.header.encryptionType == NcaSectionEncryptionType::BKTR && bktrBaseRomfs) {
             const u64 size{constant::MediaUnitSize * (entry.mediaEndOffset - entry.mediaOffset)};
             const u64 offset{sectionHeader.romfs.ivfc.levels[constant::IvfcMaxLevel - 1].offset};
 
-            RelocationBlock relocationBlock{romFs->Read<RelocationBlock>(sectionHeader.bktr.relocation.offset - offset)};
-            SubsectionBlock subsectionBlock{romFs->Read<SubsectionBlock>(sectionHeader.bktr.subsection.offset - offset)};
+            RelocationBlock relocationBlock{decryptedBacking->Read<RelocationBlock>(sectionHeader.bktr.relocation.offset - offset)};
+            SubsectionBlock subsectionBlock{decryptedBacking->Read<SubsectionBlock>(sectionHeader.bktr.subsection.offset - offset)};
 
             std::vector<RelocationBucketRaw> relocationBucketsRaw((sectionHeader.bktr.relocation.size - sizeof(RelocationBlock)) / sizeof(RelocationBucketRaw));
-            auto regionBackingRelocation{std::make_shared<RegionBacking>(romFs, sectionHeader.bktr.relocation.offset + sizeof(RelocationBlock) - offset, sectionHeader.bktr.relocation.size - sizeof(RelocationBlock))};
+            auto regionBackingRelocation{std::make_shared<RegionBacking>(decryptedBacking, sectionHeader.bktr.relocation.offset + sizeof(RelocationBlock) - offset, sectionHeader.bktr.relocation.size - sizeof(RelocationBlock))};
             regionBackingRelocation->Read<RelocationBucketRaw>(relocationBucketsRaw);
 
             std::vector<SubsectionBucketRaw> subsectionBucketsRaw((sectionHeader.bktr.subsection.size - sizeof(SubsectionBlock)) / sizeof(SubsectionBucketRaw));
-            auto regionBackingSubsection{std::make_shared<RegionBacking>(romFs, sectionHeader.bktr.subsection.offset + sizeof(SubsectionBlock) - offset, sectionHeader.bktr.subsection.size - sizeof(SubsectionBlock))};
+            auto regionBackingSubsection{std::make_shared<RegionBacking>(decryptedBacking, sectionHeader.bktr.subsection.offset + sizeof(SubsectionBlock) - offset, sectionHeader.bktr.subsection.size - sizeof(SubsectionBlock))};
             regionBackingSubsection->Read<SubsectionBucketRaw>(subsectionBucketsRaw);
 
             std::vector<RelocationBucket> relocationBuckets;
