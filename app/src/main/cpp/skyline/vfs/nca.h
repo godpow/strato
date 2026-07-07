@@ -371,6 +371,7 @@ namespace skyline {
             std::shared_ptr<Backing> romFs; //!< The backing for this NCA's RomFS section
             NCAHeader header; //!< The header of the NCA
             NCAContentType contentType; //!< The content type of the NCA
+            bool isPatch{false}; //!< If this NCA holds a BKTR patch RomFS section which can only be read on top of a base RomFS
             u64 ivfcOffset{0};
 
             NCA(std::shared_ptr<vfs::Backing> backing, std::shared_ptr<crypto::KeyStore> keyStore, bool useKeyArea = false);

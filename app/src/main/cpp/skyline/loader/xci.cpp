@@ -40,6 +40,9 @@ namespace skyline::loader {
 
                     if (nca.contentType == vfs::NCAContentType::Program && nca.romFs != nullptr && nca.exeFs != nullptr)
                         programNca = std::move(nca);
+                    else if (nca.contentType == vfs::NCAContentType::Program && nca.isPatch && nca.exeFs != nullptr && !programNca)
+                        // A patch program NCA is only usable for update patching but must still be picked up when no base program exists
+                        programNca = std::move(nca);
                     else if (nca.contentType == vfs::NCAContentType::Control && nca.romFs != nullptr)
                         controlNca = std::move(nca);
                     else if (nca.contentType == vfs::NCAContentType::Meta)

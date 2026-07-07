@@ -154,9 +154,10 @@ namespace skyline::vfs {
 
             romFs = std::make_shared<RegionBacking>(bktr, sectionHeader.romfs.ivfc.levels[constant::IvfcMaxLevel - 1].offset, romFsSize);
         } else if (sectionHeader.raw.header.encryptionType == NcaSectionEncryptionType::BKTR) {
-            // A BKTR section without a base RomFS is a patch NCA loaded standalone, its section only holds
-            // patch data so exposing it as a plain RomFS would parse garbage, loaders skip program NCAs without a RomFS
-            LOGW("Ignoring the RomFS of a patch NCA without a base");
+            // A BKTR section without a base RomFS only holds patch data, exposing it as a plain RomFS
+            // would parse garbage so the RomFS is left empty until it's reconstructed on top of a base
+            LOGD("Deferring the patch RomFS of an NCA without a base");
+            isPatch = true;
             romFs = nullptr;
         } else {
             romFs = std::move(decryptedBacking);
