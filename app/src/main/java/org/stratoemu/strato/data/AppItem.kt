@@ -21,6 +21,21 @@ class AppItem(meta : AppEntry, private val updates : List<BaseAppItem>, private 
     }
 
     fun getEnabledUpdate() : BaseAppItem? {
-        return updates.firstOrNull { it.enabled }
+        return updates.filter { it.enabled }.maxWithOrNull { x, y -> compareVersions(x.version ?: "", y.version ?: "") }
+    }
+
+    /**
+     * Compares two display versions numerically per dot-separated segment so that 1.10.0 orders above 1.9.0
+     */
+    private fun compareVersions(first : String, second : String) : Int {
+        val firstParts = first.split('.')
+        val secondParts = second.split('.')
+        for (i in 0 until maxOf(firstParts.size, secondParts.size)) {
+            val firstNumber = firstParts.getOrNull(i)?.filter { it.isDigit() }?.toIntOrNull() ?: 0
+            val secondNumber = secondParts.getOrNull(i)?.filter { it.isDigit() }?.toIntOrNull() ?: 0
+            if (firstNumber != secondNumber)
+                return firstNumber.compareTo(secondNumber)
+        }
+        return 0
     }
 }
