@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright © 2023 Strato Team and Contributors (https://github.com/strato-emu/)
 
+#include <cstring>
 #include "bktr.h"
 #include "region_backing.h"
 
@@ -223,5 +224,65 @@ namespace skyline::vfs {
             subsectionCtr >>= 8;
         }
         return iv;
+    }
+
+    SparseBacking::SparseBacking(std::shared_ptr<vfs::Backing> pPhysicalBacking, RelocationBlock pRelocation, std::vector<RelocationBucket> pRelocationBuckets, u64 pSectionStart)
+        : Backing({true, false, false}, pSectionStart + pRelocation.size),
+          physicalBacking(std::move(pPhysicalBacking)), relocation(pRelocation),
+          relocationBuckets(std::move(pRelocationBuckets)), sectionStart(pSectionStart) {
+
+        for (std::size_t i = 0; i < relocation.numberBuckets - 1; ++i)
+            relocationBuckets[i].entries.push_back({relocation.baseOffsets[i + 1], 0, 0});
+
+        relocationBuckets.back().entries.push_back({relocation.size, 0, 0});
+    }
+
+    size_t SparseBacking::ReadImpl(span<u8> output, size_t offset) {
+        if (offset < sectionStart)
+            return 0;
+        return ReadWithPartition(output, output.size(), offset - sectionStart);
+    }
+
+    size_t SparseBacking::ReadWithPartition(span<u8> output, size_t length, size_t offset) {
+        if (offset >= relocation.size)
+            return 0;
+
+        const auto relocationEntry{GetRelocationEntry(offset)};
+        const auto nextRelocation{GetNextRelocationEntry(offset)};
+
+        if (offset + length > nextRelocation.addressPatch) {
+            const u64 partition{nextRelocation.addressPatch - offset};
+            span<u8> data(output.data() + partition, length - partition);
+            return ReadWithPartition(data, length - partition, offset + partition) + ReadWithPartition(output, partition, offset);
+        }
+
+        if (relocationEntry.fromPatch) {
+            // A non-zero storage index denotes a range with no physical backing which reads as zeroes
+            std::memset(output.data(), 0, length);
+            return length;
+        }
+
+        const auto physicalOffset{offset - relocationEntry.addressPatch + relocationEntry.addressSource};
+        if (!physicalBacking || physicalOffset + length > physicalBacking->size) {
+            LOGW("Sparse entry maps outside the physical region: 0x{:X}+0x{:X}", physicalOffset, length);
+            std::memset(output.data(), 0, length);
+            return length;
+        }
+
+        span<u8> data(output.data(), length);
+        return physicalBacking->ReadUnchecked(data, physicalOffset);
+    }
+
+    RelocationEntry SparseBacking::GetRelocationEntry(u64 offset) {
+        const auto entry{SearchBucketEntry(offset, relocation, relocationBuckets, false)};
+        return relocationBuckets[entry.first].entries[entry.second];
+    }
+
+    RelocationEntry SparseBacking::GetNextRelocationEntry(u64 offset) {
+        const auto entry{SearchBucketEntry(offset, relocation, relocationBuckets, false)};
+        const auto bucket{relocationBuckets[entry.first]};
+        if (entry.second + 1 < bucket.entries.size())
+            return bucket.entries[entry.second + 1];
+        return relocationBuckets[entry.first + 1].entries[0];
     }
 }

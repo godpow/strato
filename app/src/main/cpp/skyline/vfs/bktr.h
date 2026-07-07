@@ -46,4 +46,28 @@ namespace skyline::vfs {
         size_t ReadImpl(span<u8> output, size_t offset) override;
         size_t ReadWithPartition(span<u8> output, size_t length, size_t offset);
     };
+
+    /**
+     * @brief Provides a virtual view of a sparsely stored NCA section, routing reads to physical data or zero-filled ranges
+     * @url https://switchbrew.org/wiki/NCA#SparseInfo
+     * @note The sparse table reuses the relocation bucket format, the storage index selects between physical data (0) and zeroes (1)
+     */
+    class SparseBacking : public Backing {
+      private:
+        std::shared_ptr<vfs::Backing> physicalBacking; //!< A backing over the physical sparse region within the raw NCA
+        RelocationBlock relocation;
+        std::vector<RelocationBucket> relocationBuckets;
+        u64 sectionStart; //!< The virtual offset at which the sparse section starts
+
+        RelocationEntry GetRelocationEntry(u64 offset);
+
+        RelocationEntry GetNextRelocationEntry(u64 offset);
+
+        size_t ReadWithPartition(span<u8> output, size_t length, size_t offset);
+
+      public:
+        SparseBacking(std::shared_ptr<vfs::Backing> pPhysicalBacking, RelocationBlock pRelocation, std::vector<RelocationBucket> pRelocationBuckets, u64 pSectionStart);
+
+        size_t ReadImpl(span<u8> output, size_t offset) override;
+    };
 }

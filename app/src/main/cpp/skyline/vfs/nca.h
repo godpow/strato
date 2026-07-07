@@ -137,6 +137,18 @@ namespace skyline {
         };
         static_assert(sizeof(NCABucketInfo) == 0x20);
 
+        /**
+         * @brief The header of the bucket tree table embedded in NCABucketInfo
+         * @url https://switchbrew.org/wiki/NCA#BucketInfo
+         */
+        struct NCABucketTreeHeader {
+            u32 magic; //!< "BKTR"
+            u32 version;
+            u32 entryCount;
+            u32 _pad0_;
+        };
+        static_assert(sizeof(NCABucketTreeHeader) == 0x10);
+
         struct NCASparseInfo {
             NCABucketInfo bucket;
             u64 physicalOffset;
@@ -324,6 +336,17 @@ namespace skyline {
             void ReadRomFs(const NCASectionHeader &sectionHeader, const NCASectionTableEntry &entry);
 
             std::shared_ptr<Backing> CreateBacking(const NCASectionHeader &sectionHeader, std::shared_ptr<Backing> rawBacking, size_t offset);
+
+            /**
+             * @brief Creates a virtual backing over a sparsely stored section which maps virtual offsets to physical data or zeroes
+             * @url https://switchbrew.org/wiki/NCA#SparseInfo
+             */
+            std::shared_ptr<Backing> CreateSparseBacking(const NCASectionHeader &sectionHeader, const NCASectionTableEntry &entry);
+
+            /**
+             * @brief Returns the backing section contents should be read from, either the raw backing or a sparse virtual backing
+             */
+            std::shared_ptr<Backing> GetSectionBacking(const NCASectionHeader &sectionHeader, const NCASectionTableEntry &entry);
 
             u8 GetKeyGeneration();
 
